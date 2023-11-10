@@ -23,7 +23,6 @@ jobs:
         pip install pytest  # Ensure pytest is installed
     - name: Run tests
       run: pytest
-
   deploy:
     needs: test
     runs-on: ubuntu-latest
