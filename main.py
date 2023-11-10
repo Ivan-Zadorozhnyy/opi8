@@ -66,6 +66,9 @@ def seed_data():
 
         conn.commit()
 
+@app.route('/')
+def index():
+    return "Hello, World!"
 
 @app.route("/api/reports", methods=['GET'])
 def get_reports_list():
