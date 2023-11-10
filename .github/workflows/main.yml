@@ -22,7 +22,7 @@ jobs:
         pip install -r requirements.txt
         pip install pytest  # Ensure pytest is installed
     - name: Run tests
-      run: pytest
+      run: python -m pytest
   deploy:
     needs: test
     runs-on: ubuntu-latest
