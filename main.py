@@ -2,7 +2,7 @@ import sqlite3
 import uuid
 import random
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, render_template
 
 app = Flask(__name__)
 DATABASE_NAME = 'report_configurations.db'
@@ -68,7 +68,8 @@ def seed_data():
 
 @app.route('/')
 def index():
-    return "Hello, World!"
+    return render_template('main.html')
+
 
 @app.route("/api/reports", methods=['GET'])
 def get_reports_list():
