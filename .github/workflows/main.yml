@@ -23,7 +23,7 @@ jobs:
         pip install pytest
     - name: Run tests
       run: |
-        pytest  # Replace with your test command
+        pytest  tets_e2e.py
 
   deploy:
     needs: test
