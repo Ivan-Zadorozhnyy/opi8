@@ -22,8 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run tests
       run: |
-        # Add your E2E test command here
-        # For example: pytest
+        pytest  # Replace with your test command
 
   deploy:
     needs: test
@@ -31,8 +30,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -49,11 +47,8 @@ jobs:
         PORT: ${{ secrets.REMOTE_PORT }}
       run: |
         sshpass -p $SSH_PASS ssh -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP -p $PORT << 'ENDSSH'
-          # Commands to stop the old instance of the application
-          # Pull the latest changes
+          sudo systemctl stop myapp.service  # Replace with your command
           git pull origin main
-          # Install any new dependencies
           pip install -r requirements.txt
-          # Migrate the database if needed
-          # Restart the application
+          sudo systemctl start myapp.service
         ENDSSH
