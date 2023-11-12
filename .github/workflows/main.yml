@@ -47,17 +47,10 @@ jobs:
         PORT: ${{ secrets.REMOTE_PORT }}
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP -p $PORT << 'ENDSSH'
-          # Ensure the service is stopped before pulling changes
           sudo systemctl stop app.service 
-          # Navigate to your app directory if it's not the home directory of the USERNAME
-          cd /path/to/your/app
-          # Pull the latest changes
+          cd opi8
           git pull origin main
-          # Install any new dependencies
           pip install -r requirements.txt
-          # Apply any migrations if you have any (Flask-Migrate or Alembic)
-          # flask db upgrade  # Uncomment if using Flask-Migrate or similar
-          # Restart the application
           sudo systemctl start app.service
         ENDSSH
 
