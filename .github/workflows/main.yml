@@ -9,48 +9,53 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run tests
-      run: python -m pytest 
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          python -m pytest 
 
   deploy:
-    needs: test
+    needs: [test]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-    - name: Set up SSH key
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.REMOTE_SSH_PASS }}
-      run: |
-        mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -p ${{ secrets.REMOTE_PORT }} ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-    - name: Deploy to remote server
-      env:
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        USERNAME: ${{ secrets.REMOTE_USER }}
-        PORT: ${{ secrets.REMOTE_PORT }}
-      run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP -p $PORT << 'ENDSSH'
-          sudo systemctl stop app.service 
-          cd opi8
-          git pull origin main
-          pip install -r requirements.txt
-          sudo systemctl start app.service
-        ENDSSH
+      - uses: actions/checkout@v2
+
+      - name: Set up SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.REMOTE_PORT }} ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          ssh-add ~/.ssh/id_rsa
+
+      - name: Deploy to remote server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_IP -p $REMOTE_PORT << 'ENDSSH'
+            sudo systemctl stop app.service 
+            cd /home/root/task8/opi8
+            git pull origin main
+            pip install -r requirements.txt
+            sudo systemctl start app.service
+          ENDSSH
 
