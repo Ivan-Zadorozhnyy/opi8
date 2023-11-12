@@ -2,9 +2,9 @@ name: Python Flask CI/CD
 
 on:
   push:
-    branches: [ test, main ]  # Run tests on pushes to test and main branches
+    branches: [ test, main ] 
   pull_request:
-    branches: [ main ]  # Run tests on PRs targeting main branch
+    branches: [ main ]  
 
 jobs:
   test:
@@ -20,32 +20,33 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run tests
-      run: python -m pytest  # Run pytest as a module
+      run: python -m pytest 
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    # This now checks if the push is to the main branch
     if: github.ref == 'refs/heads/main'
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.8'
-    - name: Install SSH client
+    - name: Set up SSH key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.REMOTE_SSH_PASS }}
       run: |
-        sudo apt-get update
-        sudo apt-get install -y sshpass
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -p ${{ secrets.REMOTE_PORT }} ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
     - name: Deploy to remote server
       env:
-        SSH_PASS: ${{ secrets.REMOTE_SSH_PASS }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
         USERNAME: ${{ secrets.REMOTE_USER }}
         PORT: ${{ secrets.REMOTE_PORT }}
       run: |
-        sshpass -p $SSH_PASS ssh -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP -p $PORT << 'ENDSSH'
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP -p $PORT << 'ENDSSH'
           # Ensure the service is stopped before pulling changes
           sudo systemctl stop app.service 
           # Navigate to your app directory if it's not the home directory of the USERNAME
@@ -59,3 +60,4 @@ jobs:
           # Restart the application
           sudo systemctl start app.service
         ENDSSH
+
