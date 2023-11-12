@@ -35,16 +35,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Start SSH agent
-        run: |
-          eval "$(ssh-agent -s)"
-
       - name: Set up SSH key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
+          SSH_AUTH_SOCK=$(ssh-agent -a /tmp/ssh_agent.sock)
+          export SSH_AUTH_SOCK
           echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
-          
+
       - name: Add SSH server to known_hosts
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
@@ -66,5 +64,4 @@ jobs:
             pip install -r requirements.txt
             sudo systemctl start app.service
           ENDSSH
-
 
