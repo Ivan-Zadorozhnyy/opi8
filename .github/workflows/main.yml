@@ -35,14 +35,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up SSH key
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Start SSH agent
         run: |
-          SSH_AUTH_SOCK=$(ssh-agent -a /tmp/ssh_agent.sock)
-          export SSH_AUTH_SOCK
-          echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
-
+          eval "$(ssh-agent -s)"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
+          
       - name: Add SSH server to known_hosts
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
