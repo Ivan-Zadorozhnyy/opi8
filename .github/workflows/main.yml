@@ -35,15 +35,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Start SSH agent
+        run: |
+          eval "$(ssh-agent -s)"
+
       - name: Set up SSH key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
+          echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
+          
+      - name: Add SSH server to known_hosts
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+        run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p ${{ secrets.REMOTE_PORT }} ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-          ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -p $REMOTE_PORT $SERVER_IP >> ~/.ssh/known_hosts
 
       - name: Deploy to remote server
         env:
@@ -58,4 +66,5 @@ jobs:
             pip install -r requirements.txt
             sudo systemctl start app.service
           ENDSSH
+
 
