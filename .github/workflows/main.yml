@@ -36,11 +36,13 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Start SSH agent
+        env:
+          SSH_PRIVKEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           # eval "$(ssh-agent -s)"
           # echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
           # ssh-add -L
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo $SSH_PRIVKEY > ~/.ssh/id_rsa
           cat ~/.ssh/id_rsa
 
       - name: Debug SSH
