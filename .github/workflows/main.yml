@@ -43,7 +43,7 @@ jobs:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
         run: |
           echo $SSH_PRIVKEY | tr -d '\r' | ./mykey
-          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ./mykey
           ssh -vvv -i ./mykey . -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_IP -p $REMOTE_PORT whoami && exit
 
       - name: Debug SSH
