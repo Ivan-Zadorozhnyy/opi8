@@ -39,7 +39,7 @@ jobs:
         env:
           SSH_PRIVKEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo $SSH_PRIVKEY
+          mkdir -p ~/.ssh
           echo $SSH_PRIVKEY > ~/.ssh/id_rsa
           cat ~/.ssh/id_rsa
 
