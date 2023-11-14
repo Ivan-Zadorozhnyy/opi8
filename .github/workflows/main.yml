@@ -2,7 +2,7 @@ name: Python Flask CI/CD
 
 on:
   push:
-    branches: [ test, main ] 
+    branches: [ test, main, dev ] 
   pull_request:
     branches: [ main ]  
 
@@ -37,9 +37,11 @@ jobs:
 
       - name: Start SSH agent
         run: |
-          eval "$(ssh-agent -s)"
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
-          ssh-add -L
+          # eval "$(ssh-agent -s)"
+          # echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
+          # ssh-add -L
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | ~/.ssh/id_rsa
+          cat ~/.ssh/id_rsa
 
       - name: Debug SSH
         env:
