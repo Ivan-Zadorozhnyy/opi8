@@ -43,6 +43,7 @@ jobs:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
         run: |
           touch ./mykey
+          chmod 0666 ./mykey
           echo $SSH_PRIVKEY | tr -d '\r' | ./mykey
           ssh -vvv -i ./mykey . -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_IP -p $REMOTE_PORT whoami && exit
 
