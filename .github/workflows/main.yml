@@ -30,7 +30,7 @@ jobs:
   deploy:
     needs: [test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/matt'
     
     steps:
       - uses: actions/checkout@v2
@@ -39,8 +39,7 @@ jobs:
         env:
           SSH_PRIVKEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo $SSH_PRIVKEY
-          echo $SSH_PRIVKEY > ~/.ssh/id_rsa
+          echo $SSH_PRIVKEY >> ~/.ssh/id_rsa
           cat ~/.ssh/id_rsa
 
       - name: Debug SSH
