@@ -39,6 +39,14 @@ jobs:
         run: |
           eval "$(ssh-agent -s)"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
+          ssh-add -L
+
+      - name: Debug SSH
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+        run: |
+          ssh -vvv -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_IP -p $REMOTE_PORT exit
           
       - name: Add SSH server to known_hosts
         env:
