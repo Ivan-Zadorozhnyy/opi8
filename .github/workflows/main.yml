@@ -33,44 +33,23 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Start SSH agent
-        env:
-          SSH_PRIVKEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-        run: |
-          touch ./mykey
-          chmod 0666 ./mykey
-          echo $SSH_PRIVKEY | tr -d '\r' | ./mykey
-          ssh -vvv -i ./mykey . -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_IP -p $REMOTE_PORT whoami && exit
-
-      - name: Debug SSH
+      - name: Connect to remote server and fetch latest app version
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
         run: |
-          ssh -vvv -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_IP -p $REMOTE_PORT exit
-          
-      - name: Add SSH server to known_hosts
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
-        run: |
-          mkdir -p ~/.ssh
+          eval "$(ssh-agent -s)"
+
+          mkdir ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d | tr -d '\r' | ssh-add -
           ssh-keyscan -p $REMOTE_PORT $SERVER_IP >> ~/.ssh/known_hosts
 
-      - name: Deploy to remote server
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
-        run: |
           ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_IP -p $REMOTE_PORT << 'ENDSSH'
-            sudo systemctl stop app.service 
+            sudo systemctl stop app.service
             cd /home/root/task8/opi8
             git pull origin main
             pip install -r requirements.txt
